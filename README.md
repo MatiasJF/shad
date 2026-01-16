@@ -45,6 +45,28 @@ This allows Shad to effectively utilize **gigabytes** of context — not by load
 
 ## Quick Start
 
+### Docker (Recommended)
+
+The easiest way to run Shad is with Docker:
+
+```bash
+# 1. Clone and configure
+git clone https://github.com/jonesj38/shad.git
+cd shad
+cp .env.example .env
+
+# 2. Edit .env with your vault path and API key
+nano .env
+
+# 3. Start all services (API + Frontend + Redis)
+docker-compose up -d
+
+# 4. Access the web UI
+open http://localhost:3000
+```
+
+See [QUICKSTART_DOCKER.md](QUICKSTART_DOCKER.md) for detailed instructions or [DOCKER.md](DOCKER.md) for complete Docker documentation.
+
 ### Prerequisites
 
 - Python 3.11+
@@ -53,7 +75,7 @@ This allows Shad to effectively utilize **gigabytes** of context — not by load
 - An Obsidian vault with relevant content
 - (Optional) [Obsidian Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api) plugin
 
-### Installation
+### Local Installation
 
 ```bash
 # One-liner install

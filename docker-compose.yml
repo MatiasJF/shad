@@ -16,6 +16,66 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - shad-network
+
+  # =============================================================================
+  # Shad API - Core backend service
+  # =============================================================================
+  api:
+    build:
+      context: ./services/shad-api
+      dockerfile: Dockerfile
+    container_name: shad-api
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - OBSIDIAN_VAULT_PATH=${OBSIDIAN_VAULT_PATH:-}
+      - OBSIDIAN_API_KEY=${OBSIDIAN_API_KEY:-}
+      - OBSIDIAN_BASE_URL=${OBSIDIAN_BASE_URL:-}
+      - OBSIDIAN_VERIFY_SSL=${OBSIDIAN_VERIFY_SSL:-true}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ./services/shad-api/History:/app/History
+      - ${OBSIDIAN_VAULT_PATH:-/tmp/vault}:/vault:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - shad-network
+
+  # =============================================================================
+  # Shad Frontend - Web UI
+  # =============================================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: shad-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - shad-network
 
 volumes:
   redis-data:
+
+networks:
+  shad-network:
+    driver: bridge
